@@ -1,4 +1,4 @@
-load("HeightsHC.sage")
+load("phts_hyp.sage")
 
 
 def embed_point(P, Xps, sigmas):
@@ -8,58 +8,7 @@ def embed_point(P, Xps, sigmas):
     #sigmas = embeddings(K,p,prec)
     return [Xps[i](sigmas[i](P[0]), sigmas[i](P[1])) for i in range(len(Xps))]
 
-def tiny_integrals_on_basis_parametric(self, b, z):
-    """
-    Returns all tiny integrals on basis to a parameter z
-    AUTHOR:
-            - Jennifer Balakrishnan
-    """
-    prec = self.base_ring().precision_cap()
-    x,y = self.local_coord(b,prec)
-        #S = self.base_ring()[['z']]
-        #S.set_default_prec(prec+10)
-        #S = PowerSeriesRing(self.base_ring(), 'z', prec+10)
-        #z = S.gen()
-    d = self.hyperelliptic_polynomials()[0].degree()
-    return [((x**i)*x.derivative()/(2*y)).integral()(z) for i in range(d-1)]
 
-def height_infinities_residuedisc_parametric(C, P, prec, z):
-    """
-    Computes h_p(\\infty_- - \\infty_+, P(z)-P) where P(z) is a point in the residue disc of P in parameter (can be varied) z
-    """
-    g = C.genus()
-    M = psi_omega_for_infinities_mixed_basis(C, prec)
-    PI = tiny_integrals_on_basis_parametric(C, P, z)
-    s = 2*PI[g]
-    for i in range(g):
-        s = s - M[i][0]*PI[i]
-    return s
-
-def height_infinities_residuedisc_parametric_withM(C, M, P, prec, z):
-    """
-    Computes h_p(\\infty_- - \\infty_+, P(z)-P) where P(z) is a point in the residue disc of P using the matrix of psi(omega) as an argument M, in parameter (can be varied) z
-    """
-    g = C.genus()
-    PI = tiny_integrals_on_basis_parametric(C, P, z)
-    s = 2*PI[g]
-    for i in range(g):
-        s = s - M[i][0]*PI[i]
-    return s
-
-
-def height_infinities_first_point_residuedisc_parametric(C, P, Q, prec, z):
-    """
-    Computes h_p(\\infty_- - \\infty_+, P(z)-Q)=h_p(\\infty_- - \\infty_+,
-P(z)-P)+h_p(\\infty_- - \\infty_+, P-Q) where P(z) is a point in the residue disc of P in parameter (can be varied) z
-    """
-    return height_infinities_residuedisc_parametric(C, P, prec, z) + height_infinities(C, P, Q, prec)
-
-def height_infinities_first_point_residuedisc_parametric_withM(C, M, P, Q, prec, z):
-    """
-    Computes h_p(\\infty_- - \\infty_+, P(z)-Q)=h_p(\\infty_- - \\infty_+,
-P(z)-P)+h_p(\\infty_- - \\infty_+, P-Q) where P(z) is a point in the residue disc of P using the matrix of psi(omega) as an argument M, in parameter (can be varied) z
-    """
-    return height_infinities_residuedisc_parametric_withM(C, M, P, prec, z) + height_infinities_withM(C, M, P, Q, prec)
 
 def Q_lift(CK, Q, p):
     r"""
@@ -86,7 +35,7 @@ def Q_lift(CK, Q, p):
                 Q_lift = lifts[i]
     return Q_lift
 
-def QC_over_real_qf_pairs_of_affine_residue_discs(f, p):
+def QCRQF_pairs_of_affine_residue_discs(f, p):
     K = f.base_ring()
     a = K.gens()[0]
     d = ZZ(a^2)
@@ -104,8 +53,8 @@ def QC_over_real_qf_pairs_of_affine_residue_discs(f, p):
     L2 = X2.points()
     return [[Q1, Q2] for Q1 in L1[1:len(L1)] for Q2 in L2[1:len(L2)]]
 
-#def QC_over_real_qf_Qp_curves(f, p, prec):
-def QC_over_real_qf_Qp_curves(f, t, sigmas):
+#def QCRQF_Qp_curves(f, p, prec):
+def QCRQF_Qp_curves(f, t, sigmas):
     K = f.base_ring()
     a = K.gens()[0]
     d = ZZ(a^2)
@@ -125,29 +74,9 @@ def QC_over_real_qf_Qp_curves(f, t, sigmas):
     Xp2 = HyperellipticCurve(fp2)
     return [[Xp1, Xp2], sigmas]
 
-def weierstrass_point_disc(C,P,prec):
-    K = C.base_ring()
-    p = K.prime()
-    if mod(P[1],p) != 0:
-        return print("Point not in a Weierstrass disc!")
-    for Q in C.weierstrass_points():
-        if (Q != C(0,1,0)) & (mod(P[0]-Q[0],p) == 0):
-            return Q
 
-def coleman_integrals_on_basis2(C,Q,P):
-    if C.is_in_weierstrass_disc(P):
-        W = weierstrass_point_disc(C,P,prec)
-        col_ints = C.coleman_integrals_on_basis(Q,W)
-        tiny_ints = C.tiny_integrals_on_basis(W,P)
-        return [col_ints[i] + tiny_ints[i] for i in range(4)] #4=2*g
-    if C.is_in_weierstrass_disc(Q):
-        W = weierstrass_point_disc(C,Q,prec)
-        col_ints = C.coleman_integrals_on_basis(W,P)
-        tiny_ints = C.tiny_integrals_on_basis(Q,W)
-        return [col_ints[i] + tiny_ints[i] for i in range(4)] #4=2*g
-    return C.coleman_integrals_on_basis(Q,P)
 
-def QC_over_real_qf_basis_Coleman_integrals(Xps, L, T, hts, prec):
+def QCRQF_basis_Coleman_integrals(Xps, L, T, hts, prec):
     Col_ints = matrix(Xps[0].base_ring(),4,4) #4=2*g
     for i in range(3):
         for j in range(2):
@@ -160,21 +89,21 @@ def QC_over_real_qf_basis_Coleman_integrals(Xps, L, T, hts, prec):
     return Col_ints
     #return Col_ints, (Col_ints^(-1)).determinant()
 
-def QC_over_real_qf_heights(Xps, L, T, hts, prec):
+def QCRQF_heights(Xps, L, T, hts, prec):
     heights_p = matrix(Xps[0].base_ring(),4,1)
     for i in range(3):
         heights_p[i,0] = sum(height_infinities(Xps[j], L[i][j][k], T[j][k], prec) for k in range(2) for j in range(2)) - hts[i]
     heights_p[3,0] = 1
     return heights_p
 
-def QC_over_real_qf_beta_alpha(Xps, L, T, hts, prec):
-    BasisColInts = QC_over_real_qf_basis_Coleman_integrals(Xps, L, T, hts, prec)
+def QCRQF_beta_alpha(Xps, L, T, hts, prec):
+    BasisColInts = QCRQF_basis_Coleman_integrals(Xps, L, T, hts, prec)
     beta = BasisColInts^(-1)*matrix([[0], [0], [0], [1]])
-    heights_p = QC_over_real_qf_heights(Xps, L, T, hts, prec)
+    heights_p = QCRQF_heights(Xps, L, T, hts, prec)
     alpha = BasisColInts^(-1)*heights_p
     return [beta, alpha]
 
-def QC_over_real_qf_rhos(Ms, betaalpha, base_pts, Ps, prec):
+def QCRQF_rhos(Ms, betaalpha, base_pts, Ps, prec):
     Xps = [b.scheme() for b in base_pts]
     beta = betaalpha[0]
     alpha = betaalpha[1]
@@ -193,10 +122,10 @@ def QC_over_real_qf_rhos(Ms, betaalpha, base_pts, Ps, prec):
     return [rho1, rho2]
 
 
-def QC_over_real_qf_roots_of_rhos(Ms, betaalpha, base_pts, Ps, prec, vals = [0]):
+def QCRQF_roots_of_rhos(Ms, betaalpha, base_pts, Ps, prec, vals = [0]):
     Xps = [b.scheme() for b in base_pts]
     p = Xps[0].base_ring().prime()
-    [rho1, rho2] = QC_over_real_qf_rhos(Ms, betaalpha, base_pts, Ps, prec)
+    [rho1, rho2] = QCRQF_rhos(Ms, betaalpha, base_pts, Ps, prec)
     R = Zp(p,prec+10)
     PolRing.<T1,T2> = PolynomialRing(R)
     coeffsh1 = rho1.coefficients()
@@ -218,18 +147,18 @@ def QC_over_real_qf_roots_of_rhos(Ms, betaalpha, base_pts, Ps, prec, vals = [0])
             doubleroots += drts2
     return [commonroots, doubleroots, rho1, rho2]
 
-def QC_over_real_qf_all_roots(f, Ms, betaalpha, base_pts, prec, vals = [0]):
+def QCRQF_all_roots(f, Ms, betaalpha, base_pts, prec, vals = [0]):
     """
     NOT! Returns points that are "extra", solutions of the p-adic power series systems, but not in the set of known integral points
     """
     Xps = [b.scheme() for b in base_pts]
     listofroots = []
     unclearroots = []
-    affresdiscs = QC_over_real_qf_pairs_of_affine_residue_discs(f, p)
+    affresdiscs = QCRQF_pairs_of_affine_residue_discs(f, p)
     for Fppts in affresdiscs:
         P1 = Q_lift(Xps[0], Fppts[0], p)
         P2 = Q_lift(Xps[1], Fppts[1], p)
-        [commonroots, doubleroots, rho1, rho2] = QC_over_real_qf_roots_of_rhos(Ms, betaalpha, base_pts, [P1,P2], prec, vals)
+        [commonroots, doubleroots, rho1, rho2] = QCRQF_roots_of_rhos(Ms, betaalpha, base_pts, [P1,P2], prec, vals)
         if doubleroots == 0 and len(commonroots) != 0:
             for root in commonroots:
                 z1 = root[0][0]
@@ -246,7 +175,7 @@ def QC_over_real_qf_all_roots(f, Ms, betaalpha, base_pts, prec, vals = [0]):
 
 
 
-def QC_over_real_qf_MWS_coefficients(Colemanbasisintegrals, CandidatesPoints, IntPoints, base_pts, prec = None):
+def QCRQF_MWS_coefficients(Colemanbasisintegrals, CandidatesPoints, IntPoints, base_pts, prec = None):
     # TODO: Arbitrary genus
     # prec: desired output precision
     minorbasis = Colemanbasisintegrals.submatrix(0,0,3,3)
@@ -296,7 +225,7 @@ def QC_over_real_qf_MWS_coefficients(Colemanbasisintegrals, CandidatesPoints, In
             
     return coeffs, int_coeffs
 
-def QCMWS(X, p, integral_pts, generators, hts_away, can_x, base_pt, prec, final_prec = None, base_change_matrix = None, embeddings = None, Xps = None, vals = [0]):
+def QCRQNF_MWS(X, p, integral_pts, generators, hts_away, can_x, base_pt, prec, final_prec = None, base_change_matrix = None, embeddings = None, Xps = None, vals = [0]):
     K = X.base_ring()
     g = X.genus()
     f, h = X.hyperelliptic_polynomials()
@@ -313,10 +242,10 @@ def QCMWS(X, p, integral_pts, generators, hts_away, can_x, base_pt, prec, final_
         R = Q_p['x']
         embeddings = [K.hom([r[0]]) for r in R(K.defining_polynomial()).roots()]
     if Xps == None:
-        Xps = QC_over_real_qf_Qp_curves(f, x, embeddings)
+        Xps = QCRQF_Qp_curves(f, x, embeddings)
     pts = [Xp.lift_x(can_x) for Xp in Xps]
     can_divs = [[pts[i], opposite_affine_point(Xps[i], pts[i])] for i in range(g)] 
-    betaalpha = QC_over_real_qf_beta_alpha(Xps, generators, can_divs, hts_away, prec)
+    betaalpha = QCRQF_beta_alpha(Xps, generators, can_divs, hts_away, prec)
     basis_col_ints = matrix(Xps[0].base_ring(),4,3)
     for i in range(2):
         for j in range(2):
@@ -325,11 +254,11 @@ def QCMWS(X, p, integral_pts, generators, hts_away, can_x, base_pt, prec, final_
 
     Ms = [psi_omega_for_infinities_mixed_basis(Xp, prec) for Xp in Xps]
     base_pts = embed_point(base_pt, Xps, embeddings)
-    [roots, unclearroots] = QC_over_real_qf_all_roots(f, Ms, betaalpha, base_pts, prec, vals)
+    [roots, unclearroots] = QCRQF_all_roots(f, Ms, betaalpha, base_pts, prec, vals)
     int_pts_pairs = [embed_point(P, Xps, embeddings) for P in integral_pts]
     if base_change_matrix != None:
         basis_col_ints = basis_col_ints*base_change_matrix
-    coeffs, int_coeffs = QC_over_real_qf_MWS_coefficients(basis_col_ints, roots, int_pts_pairs, base_pts, prec = final_prec)
+    coeffs, int_coeffs = QCRQF_MWS_coefficients(basis_col_ints, roots, int_pts_pairs, base_pts, prec = final_prec)
 
     return coeffs, int_coeffs, unclearroots, roots, int_pts_pairs
 
