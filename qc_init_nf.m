@@ -64,6 +64,9 @@ end function;
 function is_good_split_ordinary(C, p)
 // C is a hyperelliptic curve over a number field, p is a prime
 // Check if C is good and ordinary at all primes above p
+//
+// This is really stupid and slow, but it works
+// TODO: Replace!
     F := BaseRing(C);
     g := Genus(C);
     fact := Factorisation(p*Integers(F));
