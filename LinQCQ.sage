@@ -1,13 +1,19 @@
 load("phts_hyp.sage")
 
-# The functions in this file use quadratic Chabauty to compute a finite set of p-adic points containing
-# the integral points on a hyperelliptic curve y^2=f(x), where f is monic and squarefree and has even degree.
-# To do:
-# - QCQ_roots_of_rho: why the many copies of roots = []? Why ((rho-ha)-ha)?
-# - incorporate precision analysis
-# - add algorithm for input for MW sieve (see code for number fields).
-# - allow nontrivial local contributions away from p.
-# Note that the MW sieve is not necessary for our main example
+"""
+    The functions in this file use quadratic Chabauty to compute a finite set of p-adic points containing
+    the integral points on a hyperelliptic curve y^2=f(x), where f is a
+    polynomial over the integers that is  monic and squarefree and has even degree.
+
+    AUTHORS: Stevan Gajović and Steffen Müller
+
+    TO DO:
+    - incorporate precision analysis
+    - add double roots case
+    - add algorithm for input for MW sieve (see code for number fields), not
+    necessary for our example.
+    - allow nontrivial local contributions away from p.
+"""
 
 def Q_lift(CK, Q, p):
     r"""
@@ -60,7 +66,7 @@ def QCQ_basis_Coleman_integrals(Xp, L, prec):
     g = Xp.genus()
     Col_ints = matrix(Xp.base_ring(),g,g)
     for i in range(g):
-        ListIntegrals = [coleman_integrals_on_basis_modified(L[i][1][k], L[i][0][k]) for k in range(len(L[i])/2)]
+        ListIntegrals = [coleman_integrals_on_basis_modified(L[i][1][k], L[i][0][k]) for k in range(len(L[i][0]))]
         for j in range(g):
             Col_ints[i,j] = sum(ListIntegrals[k][j] for k in range(len(L[i])/2))
     return Col_ints
@@ -70,13 +76,13 @@ def QCQ_heights(Xp, M, L, hts, prec):
     g = Xp.genus()
     heights_p = matrix(Xp.base_ring(),g,1)
     for i in range(g):
-        heights_p[i,0] = sum(height_infinities(L[i][0][k], L[i][1][k], prec, M) for k in range(len(L[i])/2)) - hts[i]
+        heights_p[i,0] = sum(height_infinities(L[i][0][k], L[i][1][k], prec, M) for k in range(len(L[i][0]))) - hts[i]
     return heights_p
 
 def QCQ_alpha(Xp, M, L, hts, prec):
     """Our assumption is that we can express the linear map J(Q) --> Qp given by the height D |--> h(\infty_- - \infty_+, D) as a linear combination of Coleman integrals:
     h(\infty_- - \infty_+, D) = alpha_0 \int_{D}\omega_0 + ... + alpha_{g-1} \int_{D}\omega_{g-1}. 
-    This function computes the coefficients alpha and stores them as an 1xg matrix."""
+    This function computes the coefficients alpha and stores them as a 1xg matrix."""
     BasisColInts = QCQ_basis_Coleman_integrals(Xp, L, prec)
     heights_p = QCQ_heights(Xp, M, L, hts, prec)
     alpha = BasisColInts^(-1)*heights_p
@@ -96,19 +102,13 @@ def QCQ_rho(Xp, M, alpha, base_pt, P, prec):
 
 
 def QCQ_roots_of_rho(Xp, M, alpha, base_pt, P, hts_away, prec):
-    """This function uses the function rho computed just above, and returns all the roots of equations rho(z) = hts_away[i], where hts_away is the list of potential contributions of h(\infty_- - \infty_+, P-Q) away from p for integral points P and Q."""
+    """Returns all the roots of equations rho(z) = hts_away[i], where hts_away is the list of potential contributions of h(\infty_- - \infty_+, P-Q) away from p for integral points P and Q."""
     p = Xp.base_ring().prime()
     rho = QCQ_rho(Xp, M, alpha, base_pt, P, prec)
     # Note that polrootspadic sometimes has issues with double roots.
     roots = []
-#    for ha in hts_away:
-#        roots = []
-#    for ha in hts_away:
-#        roots = []
     for ha in hts_away:
-        #print("ha", ha)
-        #roots = roots + roots + roots + sage.libs.pari.convert_sage.gen_to_sage(pari.polrootspadic(((rho-ha)-ha).truncate(),p,prec))
-        roots = roots + sage.libs.pari.convert_sage.gen_to_sage(pari.polrootspadic(((rho-ha)-ha).truncate(),p,prec))
+        roots = roots + sage.libs.pari.convert_sage.gen_to_sage(pari.polrootspadic((rho-ha).truncate(),p,prec))
     return roots
 
 def QCQ_all_roots(Xp, M, alpha, hts_away, base_pt, prec):
@@ -122,6 +122,7 @@ def QCQ_all_roots(Xp, M, alpha, hts_away, base_pt, prec):
     for Fppts in affresdiscs:
         #print("Residue disc ", Fppts)
         P = Q_lift(Xp, Fppts, p)
+        #roots, doubleroots = QCQ_roots_of_rho(Xp, M, alpha, base_pt, P, hts_away, prec)
         roots = QCQ_roots_of_rho(Xp, M, alpha, base_pt, P, hts_away, prec)
         #print("Roots ", roots)
         if len(roots) != 0:
@@ -129,18 +130,9 @@ def QCQ_all_roots(Xp, M, alpha, hts_away, base_pt, prec):
                 if (valuation(z) >= 0):
                     x1, y1 = Xp.local_coord(P)
                     RootPoint = Xp(x1.truncate()(p*z),y1.truncate()(p*z))
-                    #print("Found a point ", RootPoint)
                     listofroots = listofroots + [RootPoint]
-                #print("listofroots", len(listofroots))
         #if doubleroots != 0:
-            #unclearroots = unclearroots + [[P1, P2], [rho1, rho2]]
+        #    unclearroots = unclearroots + [[P1, P2], [rho1, rho2]]
+    #return listofroots, unclearroots
     return listofroots
-
-
-
-
-
-
-
-
 
