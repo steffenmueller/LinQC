@@ -15,7 +15,7 @@ if Cps[0] == Cp2:
 
 # Find common roots of quadratic Chabauty functions 
 # and write their images under Abel-Jacobi in terms of generators.
-coeffs, int_coeffs, unclearroots, roots, int_pts_pairs = QCRQF_MWS(C, p, integral_pts, generators, away_hts_generators, can_x, integral_pts[0], prec, final_prec = 5, base_change_matrix = base_change_matrix, embeddings = sigmas, Xps = Cps, vals = vals)
+coeffs, int_coeffs, unclearroots, roots, int_pts_pairs = QCRQF_MWS(C, p, integral_pts, generators, can_x,  integral_pts[0], away_hts_generators, prec, final_prec = 5, base_change_matrix = base_change_matrix, embeddings = sigmas, Xps = Cps, vals = vals)
 
 # Check that all roots were determined
 assert len(unclearroots) == 0
