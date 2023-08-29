@@ -1,11 +1,17 @@
 load("phts_hyp.sage")
 """
-This runs the quadratic Chabauty method for OK-integral points described in 
-``Linear quadratic Chabauty'' on a sextic genus 2 curve $X:y^2=f(x)$ 
-defined over a real quadratic field K. We use a split prime p of good 
-reduction.
-Let $\sigma_1, \sigma_2$ be the completions $K\rightarrow \mathbb{Q}_p$ and
-let $X_1,X_2$ be the respective base-changed curves.
+    This runs the quadratic Chabauty method for OK-integral points described in 
+    ``Linear quadratic Chabauty'' on a sextic genus 2 curve $X:y^2=f(x)$ 
+    defined over a real quadratic field K. We use a split prime p of good 
+    reduction.
+
+    AUTHORS: Stevan Gajović and Steffen Müller
+
+    Throughout, let $\sigma_1, \sigma_2$ be the completions $K\rightarrow \mathbb{Q}_p$ and
+    let $X_1,X_2$ be the respective base-changed curves.
+
+
+    TODO: incorporate precision analysis
 """
 
 def embed_point(P, Xps, sigmas):
@@ -162,8 +168,7 @@ def QCRQF_rhos(Ms, betaalpha, base_pts, Ps, prec):
     alpha = betaalpha[1]
     p = Xps[0].base_ring().prime()
     QQp = pAdicField(p, prec)
-    #TODO: Fix precision!
-    S.<z1,z2> = PowerSeriesRing(QQp, prec+10)
+    S.<z1,z2> = PowerSeriesRing(QQp, prec+10) 
     S1, S2 = base_pts 
     P1, P2 = Ps  
     M1, M2 = Ms
@@ -396,7 +401,8 @@ def QCRQF_MWS(X, p, integral_pts, generators, can_x, base_pt, hts_away,  prec, f
         R = Q_p['x']
         embeddings = [K.hom([r[0]]) for r in R(K.defining_polynomial()).roots()]
     if Xps == None: # Compute the based changed curves X1, X2 over Q_p
-        Xps = QCRQF_Qp_curves(f, x, embeddings)
+        L = QCRQF_Qp_curves(f, x, embeddings)
+        Xps = L[0]
     pts = [Xp.lift_x(can_x) for Xp in Xps]  
     #  pts = [(sigma1(can_x),y1), (sigma2(can_x),y2)]
     can_divs = [[pts[i], opposite_affine_point(pts[i])] for i in range(g)] 
