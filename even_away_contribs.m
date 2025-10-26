@@ -76,7 +76,8 @@ function away_contribs(C : int_pt := 0, primes := [])
   // if v_q(disc) = 1, then the contribution at q is trivial.
   very_bad_primes := [q: q in divs_lcf | Valuation(lcf, q) gt 1];  
   for q in bad_primes do
-    if IsSquare(my_change_ring(f, q)) then 
+    if IsEven(Norm(q)) or IsSquare(my_change_ring(f, q)) then 
+      // Added primes above 2 -- jsm, 26/20/25
       Append(~very_bad_primes, q);
     end if;
   end for; 
@@ -101,11 +102,6 @@ function away_contribs(C : int_pt := 0, primes := [])
       if inf_comp1 ne inf_comp2 then  // else trivial
         cpts := Components(model);
         mults := Multiplicities(model);
-        // Check the adjunction formula. TODO: Fix!
-//        ad_list := [-M[i, i] - 2 
-//          + 2* Genus(Curve(AffineSpace(Parent(Basis(cpts[i])[1])), cpts[i]))          
-//                  : i in [1..Nrows(M)]];
-        // assert &+[ad_list[i] * mults[i] : i in [1..Nrows(M)]] eq 2*g - 2;
         N := pseudoinverse(M);
         // list all possible intersection vectors arising from horizontal divisors of
         // degree 1 
